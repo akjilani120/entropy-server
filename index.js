@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require ("cors")
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const uri = `mongodb+srv://akjilani:Rp7pHWKAN3kd9ibC@cluster0.uddhpex.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -33,6 +33,25 @@ async function run() {
       const blog = req.body
       console.log(blog)
       const result = await blogCollection.insertOne(blog)
+      res.send(result)
+    })
+    app.delete("/blog/delete/:id" , async(req , res) =>{
+      const id = req.params.id
+      const query = {_id : ObjectId(id)}
+      const result = await blogCollection.deleteOne(query)
+      res.send(result)
+    })
+    app.put("/blog/update/:id" , async(req , res) =>{
+      const id = req.params.id
+      const filter = {_id : ObjectId(id)}
+      const blog = req.body
+      console.log(blog)
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: blog
+      };
+      const result = await blogCollection.updateOne(filter, updateDoc, options)
+      console.log(result)
       res.send(result)
     })
   }finally{
